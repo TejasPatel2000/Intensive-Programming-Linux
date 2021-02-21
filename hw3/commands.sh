@@ -1,0 +1,33 @@
+#Running this file does NOT work. It was just put here to find commands easier
+#SED One Liner
+sed -n 's/\(.*\) by \(.*\) \([0-9].*\) ago \(.*\) \([0-9.].*\) views$/\"\1\",\"\2\",\"\3\",\"\4\",\"\5\"/p' clips.txt > sedTbl.csv
+
+#GREP METHOD
+#Get correct part of HTML file
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; echo ${title}; done  > clips .txt
+#Get Titles
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; grep -P -o '.*(?= by)'<<< $title || printf "\n"; done | tr ',' ' '  > grep_titles.txt
+#Get Users
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; grep -P -o '(?<= by ).*(?= [0-9].* ago)' <<< $title || printf "\n"; done | tr ',' ' ' > grep_users.txt
+#Get Upload
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; grep -P -o '(?<= by).*( \K[0-9]).*(?= ago)' <<< $title || printf "\n"; done | tr ',' ' ' > grep_upload.txt
+#Get Duration
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; grep -P -o '(?<=ago ).*(\K[0-9])*+( minutes| seconds)' <<< $title || printf "\n"; done | tr ',' ' '  > grep_duration.txt
+#Get Views
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; grep -P -o '(?<= seconds | second | minute ).*(?=views)' <<< $title || printf "\n"; done | tr ',' ' '> grep_views.txt
+#Export Grep To CSV
+paste -d "," grep_titles.txt grep_users.txt grep_upload.txt grep_duration.txt grep_views.txt > grepTbl.csv
+
+#EXPR METHOD
+#Get Title
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; expr "$title" : "\(.*\) by"; done |tr ',' ' ' > expr_titles.txt
+#Get Users
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; expr "$title" : ".*by \(.*\) [0-9].* ago .*"; done |tr ',' ' '  > expr_users.txt
+#Get Upload
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; expr "$title" : ".*by .* \([0-9].*\)\ ago .*"; done |tr ',' ' ' > expr_upload.txt
+#Get Duration
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; expr "$title" : ".* ago \([0-9].*\) [0-9].* views.*"; done |tr ',' ' ' > expr_duration.txt
+#Get Views
+grep '</ytd-thumbnail><div' youtube.html | while read x; do title=`expr "$x" : ".*aria-label=\"\(.*\)\" title=\".*"`; expr "$title" : ".* ago .* \([0-9].*\)\ views.*"; done |tr ',' ' ' > expr_views.txt
+#Export to CSV
+paste -d "," expr_titles.txt expr_users.txt expr_upload.txt expr_duration.txt expr_views.txt > exprTbl.csv

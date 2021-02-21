@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+function createTreeBreadth(){
+    depth=$1
+    breadth=$2
+    open=($dir)
+    for ((i=0; i<$depth; i++)); do
+	tmp=()
+	for x in ${open[@]}; do
+	    tmp_open=()
+	    for ((j=0; j<$breadth; j++)); do
+		mkdir -p $x/$j
+		tmp=( ${tmp[@]} $x/$j)
+	    done
+	    tmp_open=( ${tmp_open[@]} ${tmp[@]})
+	done
+	open=${tmp_open[@]}
+    done
+}
+
+
+function createTreeDepth(){
+    declare -i currDepth=$1
+    declare -i fileNum=$2
+    declare -i bCounter=0
+    if [ $currDepth -lt $depth ]; then
+	mkdir $fileNum
+	cd $fileNum
+	((currDepth++))
+	while [ $bCounter -lt $breadth ]; do
+	    createTreeDepth $currDepth $bCounter
+	    ((bCounter++))
+	done
+	cd ..
+    fi
+    
+}
+
+
+function main(){
+    local dir=$3
+    local choice=$4
+    if [ $choice = 'depth' ]; then
+	depth=$1
+	breadth=$2
+	mkdir $dir
+	cd $dir
+	createTreeDepth
+    elif [ $choice = 'breadth' ]; then
+	createTreeBreadth $1 $2 $dir
+    else
+	echo "Please enter breadth or depth as your fourth argument"
+    fi
+    tree $dir
+}
+
+
+main $1 $2 $3 $4
